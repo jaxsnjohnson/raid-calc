@@ -11,52 +11,52 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             margin: 0;
-            padding: 8px; /* Slightly less padding */
-            background-color: #008080; /* Classic Teal background */
+            padding: 8px; 
+            background-color: #008080; 
             color: #000000;
-            font-size: 13px; /* Consistent small font */
+            font-size: 13px; 
         }
 
         /* Container for the calculator - Windowed App Style */
         .container {
-            background-color: #c0c0c0; /* System Silver/Gray */
-            padding: 0; /* Padding will be inside content area */
+            background-color: #c0c0c0; 
+            padding: 0; 
             border: 2px outset #ffffff;
-            box-shadow: 2px 2px 5px #808080; /* Subtle shadow for depth */
+            box-shadow: 2px 2px 5px #808080; 
             width: 100%;
-            max-width: 880px; /* Adjusted width */
+            max-width: 880px; 
             margin: 10px auto;
             box-sizing: border-box;
         }
         .title-bar {
-            background-color: #000080; /* Navy Blue for title bar */
+            background-color: #000080; 
             color: #ffffff;
             padding: 4px 8px;
             font-weight: bold;
             font-size: 14px;
             border-bottom: 2px solid #000000;
-            text-align: left; /* Align title to left like old windows */
+            text-align: left; 
         }
         .title-bar h1 {
-             font-family: Arial, Helvetica, sans-serif; /* Use Arial for title bar text */
+             font-family: Arial, Helvetica, sans-serif; 
              font-size: 14px;
              color: #ffffff;
              margin: 0;
              padding: 0;
-             border-bottom: none; /* Remove h1's own border */
+             border-bottom: none; 
              text-align: left;
         }
         .content-area {
-            padding: 10px; /* Padding for the actual content inside the window */
+            padding: 10px; 
         }
 
 
         /* Styling for headings within content */
         h2 { 
-            font-size: 16px; /* Slightly smaller H2 */
+            font-size: 16px; 
             margin-top: 15px;
             margin-bottom: 10px;
-            background-color: #808080; /* Medium Gray for section headers */
+            background-color: #808080; 
             color: #ffffff;
             padding: 3px 6px;
             border: 1px outset #a0a0a0;
@@ -64,7 +64,7 @@
             font-family: Arial, Helvetica, sans-serif;
         }
         h3 { 
-            font-size: 14px; /* Smaller H3 */
+            font-size: 14px; 
             color: #000000;
             text-align: left;
             margin-top: 8px;
@@ -78,7 +78,7 @@
         .drive-entry {
             display: grid;
             grid-template-columns: 1fr; 
-            gap: 6px; /* Reduced gap */
+            gap: 6px; 
             align-items: center; 
             margin-bottom: 10px;
             padding: 8px;
@@ -87,19 +87,20 @@
         }
         @media (min-width: 768px) { 
             .drive-entry {
-                grid-template-columns: auto 1fr auto min-content auto min-content auto 1fr auto;
-                grid-template-areas: "drivelabel drivename drivecap drivecapvalue driveprice drivepricevalue drivelink drivelinkvalue remover";
+                /* drivlabel, drivename, drivecaplabel, drivecapinput, drivepricelabel, drivepriceinput, drivelinklabel, drivelinkinput, remover */
+                grid-template-columns: auto minmax(120px, 1.5fr) auto 130px auto 140px auto minmax(120px, 1fr) auto;
+                grid-template-areas: "drivelabel drivename drivecaplabel drivecapinput drivepricelabel drivepriceinput drivelinklabel drivelinkinput remover";
                 align-items: center; 
-                gap: 4px 6px; /* Further reduced gap */
+                gap: 4px 8px; /* Increased column gap slightly for better separation */
             }
-            .drive-entry .drive-identifier-label { grid-area: drivelabel; white-space: nowrap;}
+            .drive-entry .drive-identifier-label { grid-area: drivelabel; white-space: nowrap; padding-right: 5px;}
             .drive-entry input[id^="name-"] { grid-area: drivename; }
-            .drive-entry label[for^="capacity-"] { grid-area: drivecap; }
-            .drive-entry input[id^="capacity-"] { grid-area: drivecapvalue; width:65px;} /* Slightly smaller */
-            .drive-entry label[for^="price-"] { grid-area: driveprice; }
-            .drive-entry input[id^="price-"] { grid-area: drivepricevalue; width:75px;} /* Slightly smaller */
-            .drive-entry label[for^="link-"] { grid-area: drivelink; }
-            .drive-entry input[id^="link-"] { grid-area: drivelinkvalue; }
+            .drive-entry label[for^="capacity-"] { grid-area: drivecaplabel; text-align: right; padding-right: 4px;}
+            .drive-entry input[id^="capacity-"] { grid-area: drivecapinput; width: 100%;} /* Input takes full width of its defined column */
+            .drive-entry label[for^="price-"] { grid-area: drivepricelabel; text-align: right; padding-right: 4px;}    
+            .drive-entry input[id^="price-"] { grid-area: drivepriceinput; width: 100%;} 
+            .drive-entry label[for^="link-"] { grid-area: drivelinklabel; text-align: right; padding-right: 4px;}    
+            .drive-entry input[id^="link-"] { grid-area: drivelinkinput; }
             .drive-entry .remove-drive { 
                 grid-area: remover; 
                 margin-left:auto;
@@ -118,7 +119,7 @@
             margin-bottom: 2px;
             font-weight: bold; 
             color: #000000;
-            font-size: 12px; /* Even smaller labels */
+            font-size: 12px; 
         }
 
         /* Inputs, Selects - 90s style */
@@ -129,23 +130,28 @@
         .raid-config-section input[type="number"],
         .global-settings select,
         .load-config-section select {
-            padding: 3px 4px; /* Reduced padding */
-            border: 1px inset #000000; /* Sharper inset */
+            padding: 3px 4px; 
+            border: 1px inset #000000; 
             background-color: #ffffff; 
             border-radius: 0; 
             box-sizing: border-box;
-            width: 100%; 
+            /* width: 100%; Let grid column define width for specific inputs */
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 12px; /* Smaller font in inputs */
+            font-size: 12px; 
             color: #000000;
         }
+        /* Ensure inputs that should take full width of their flexible column do so */
+        .drive-entry input[id^="name-"], .drive-entry input[id^="link-"] {
+            width: 100%;
+        }
+
         .raid-config-section input[type="checkbox"] {
             width: auto; 
             margin-right: 4px; 
             vertical-align: middle;
             border: 1px solid #000000; 
             appearance: checkbox; 
-            transform: scale(0.9); /* Make checkbox slightly smaller */
+            transform: scale(0.9); 
         }
         .input-field-group.zfs-rule label { 
             display: inline-flex; 
@@ -154,7 +160,7 @@
             font-size: 12px;
         }
         .input-field-group.zfs-rule small {
-            font-size: 10px; /* Smaller small text */
+            font-size: 10px; 
             color: #000000;
             display: block; 
             margin-top: 1px;
@@ -169,23 +175,25 @@
             outline: 1px solid #000080;
             box-shadow: none;
         }
-        .raid-config-section input[type="number"] {
+        .raid-config-section input[type="number"] { /* For "Drives in RAID" field */
             max-width: 80px; 
+            width: 80px; /* Explicit width */
         }
-        .global-settings select {
+        .global-settings select { /* For Currency select */
             max-width: 70px;
+            width: 70px; /* Explicit width */
         }
 
 
         .drive-entry .remove-drive {
-            padding: 3px 6px; /* Smaller padding */
-            background-color: #c0c0c0; /* Match container */
+            padding: 3px 6px; 
+            background-color: #c0c0c0; 
             color: #000000;
             border: 2px outset #e0e0e0; 
             border-radius: 0;
             cursor: pointer;
             font-weight: bold;
-            font-size: 11px; /* Smaller font */
+            font-size: 11px; 
             height: auto; 
         }
         .drive-entry .remove-drive:active {
@@ -193,10 +201,10 @@
         }
         
         .global-settings, .drive-input-section, .raid-config-section, .load-config-section, .results-section, .raid-explanations-section {
-            margin-bottom: 12px; /* Reduced margin */
-            padding: 8px; /* Reduced padding */
+            margin-bottom: 12px; 
+            padding: 8px; 
             border: 2px groove #808080; 
-            background-color: #c0c0c0; /* Match main container */
+            background-color: #c0c0c0; 
         }
 
 
@@ -229,7 +237,7 @@
             .raid-config-section select {
                 min-width: 160px;
             }
-            .raid-config-section input[type="number"] {
+            .raid-config-section input[type="number"] { /* For "Drives in RAID" field */
                 min-width: 70px;
             }
         }
@@ -242,16 +250,16 @@
             margin-top: 6px; 
         }
         .action-buttons button, .config-buttons button {
-            padding: 5px 10px; /* Smaller padding */
+            padding: 5px 10px; 
             background-color: #c0c0c0; 
             color: #000000;
-            border: 2px outset #dfdfdf; /* Lighter outset for more pop */
-            border-bottom-color: #808080; /* Darker bottom/right for 3D */
+            border: 2px outset #dfdfdf; 
+            border-bottom-color: #808080; 
             border-right-color: #808080;
             border-radius: 0;
             cursor: pointer;
             margin-top: 4px; 
-            font-size: 12px; /* Smaller font */
+            font-size: 12px; 
             font-weight: bold;
             flex-grow: 1;
         }
@@ -296,14 +304,14 @@
             margin-top: 15px;
             padding: 4px; 
             border: 2px inset #808080;
-            background-color: #c0c0c0; /* Match container */
+            background-color: #c0c0c0; 
         }
         #results-list {
             padding: 8px;
             background-color: #ffffff; 
             border: 1px solid #000000;
             margin: 4px 0; 
-            font-size: 12px; /* Smaller font for results list */
+            font-size: 12px; 
         }
         #results-chart-container {
             padding: 8px;
@@ -315,7 +323,7 @@
 
 
         .result-item {
-            padding: 4px 6px; /* Tighter padding */
+            padding: 4px 6px; 
             border-bottom: 1px solid #808080; 
             display: flex;
             flex-wrap: wrap;
@@ -328,7 +336,7 @@
             border-bottom: none;
         }
         .result-item.best-value {
-            background-color: #00ff00; /* Brighter green */
+            background-color: #00ff00; 
             color: #000000;
             font-weight: bold;
         }
@@ -365,7 +373,7 @@
             flex-grow: 1;
         }
         .raid-summary-item.highlight-zfs-rule {
-            background-color: #ffffc0; /* Lighter yellow */
+            background-color: #ffffc0; 
             color: #000000;
             padding: 2px 3px;
             border: 1px dotted #000000;
@@ -380,18 +388,18 @@
 
         #summary { /* Status Bar Style */
             margin-top: 8px; 
-            font-weight: normal; /* Normal weight for status bar */
+            font-weight: normal; 
             font-size: 12px;
             padding: 3px 6px;
             background-color: #c0c0c0; 
             color: #000000; 
-            border: 1px inset #808080; /* Inset border for status bar */
-            text-align: left; /* Align left */
-            height: 20px; /* Fixed height like a status bar */
-            line-height: 14px; /* Vertically center text */
+            border: 1px inset #808080; 
+            text-align: left; 
+            height: 20px; 
+            line-height: 14px; 
         }
         #summary p { margin: 0; }
-        #summary strong { font-weight: bold; } /* Allow bold within status bar */
+        #summary strong { font-weight: bold; } 
 
 
         .drive-identifier-label {
@@ -401,7 +409,7 @@
         }
 
         .explanation-item {
-            background-color: #c0c0c0; /* Match container */
+            background-color: #c0c0c0; 
             padding: 8px;
             border: 1px solid #000000;
             margin-bottom: 8px;
@@ -409,7 +417,7 @@
         .explanation-item h3 {
             margin-top: 0;
             color: #000080; 
-            font-size: 14px; /* Smaller H3 */
+            font-size: 14px; 
             border-bottom: 1px solid #000000;
         }
         .explanation-item p {
@@ -433,12 +441,12 @@
         @media (max-width: 767px) { 
             .container {
                 margin: 4px;
-                padding: 0; /* Container padding removed, content-area has it */
+                padding: 0; 
             }
             .content-area {
                 padding: 8px;
             }
-            h1 { font-size: 18px; } /* Title bar H1 */
+            h1 { font-size: 18px; } 
             .title-bar h1 { font-size: 13px; }
             h2 { font-size: 15px; }
 
@@ -820,20 +828,25 @@
             if (window.innerWidth >= 768) { 
                 identifierLabel.style.gridArea = 'drivelabel';
                 nameInput.style.gridArea = 'drivename';
-                capLabel.style.gridArea = 'drivecap';
-                capInput.style.gridArea = 'drivecapvalue';
-                priceLabel.style.gridArea = 'driveprice';
-                priceInput.style.gridArea = 'drivepricevalue';
-                linkLabel.style.gridArea = 'drivelink';
-                linkInput.style.gridArea = 'drivelinkvalue';
+                capLabel.style.gridArea = 'drivecaplabel'; 
+                capInput.style.gridArea = 'drivecapinput'; 
+                priceLabel.style.gridArea = 'drivepricelabel';
+                priceInput.style.gridArea = 'drivepriceinput';
+                linkLabel.style.gridArea = 'drivelinklabel';
+                linkInput.style.gridArea = 'drivelinkinput';
                 if (removeBtn) removeBtn.style.gridArea = 'remover';
-                [capLabel, priceLabel, linkLabel].forEach(lbl => lbl.classList.add('visually-hidden'));
+                
+                // Labels for Capacity and Price are now always visible on desktop due to explicit grid areas.
+                // Only hide the Link label if its placeholder is sufficient.
+                capLabel.classList.remove('visually-hidden');
+                priceLabel.classList.remove('visually-hidden');
+                linkLabel.classList.add('visually-hidden'); // Link label can be hidden if placeholder is good
 
             } else { 
                 identifierLabel.style.gridArea = 'drivelabel';
                 nameInput.style.gridArea = 'drivename';
                 capLabel.style.gridArea = 'drivecaplabel'; 
-                capInput.style.gridArea = 'drivecapvalue';
+                capInput.style.gridArea = 'drivecapvalue'; 
                 priceLabel.style.gridArea = 'drivepricelabel'; 
                 priceInput.style.gridArea = 'drivepricevalue';
                 linkLabel.style.gridArea = 'drivelinklabel';
@@ -847,11 +860,10 @@
         styleSheet.innerHTML = `
             .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; border: 0 !important; }
             @media (min-width: 768px) { 
-                /* On desktop, .visually-hidden is applied by JS to specific labels */
+                /* On desktop, .visually-hidden is applied by JS to specific labels if needed */
             }
             @media (max-width: 767px) { 
-                /* On mobile, ensure labels meant to be hidden on desktop are visible if they don't have .visually-hidden */
-                label.visually-hidden-desktop { 
+                label.visually-hidden-desktop { /* This class is not used by JS anymore for cap/price */
                     position: static !important; width: auto !important; height: auto !important; 
                     margin: 0 0 3px 0 !important; overflow: visible !important; 
                     clip: auto !important; border: 0 !important; display: block !important; 
@@ -873,7 +885,7 @@
                 remainingEntries.forEach((entry, index) => {
                     const currentIdSuffix = entry.id.split('-')[2];
                     entry.querySelector('.drive-identifier-label').textContent = `Drive ${index + 1}:`;
-                    entry.querySelector('.drive-identifier-label').id = `drive-identifier-label-${currentIdSuffix}`; // Keep ID consistent for aria
+                    entry.querySelector('.drive-identifier-label').id = `drive-identifier-label-${currentIdSuffix}`; 
                 });
                  if (remainingEntries.length === 0) {
                     driveIdCounter = 0; 
@@ -903,7 +915,7 @@
             addDriveEntry(driveEntries.length === 0);
         });
 
-        const CONFIG_STORAGE_KEY = 'retroDriveCalculatorConfigs_v3'; // Incremented version for new structure if needed
+        const CONFIG_STORAGE_KEY = 'retroDriveCalculatorConfigs_v3'; 
 
         function getSavedConfigs() {
             return JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY)) || [];
