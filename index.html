@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drive & RAID Cost Calculator  - ZFS, Price/TB Tool</title>
-    <meta name="description" content="Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3).">
+    <title>Drive & RAID Cost Calculator - ZFS, Price/TB Tool</title>
+    <meta name="description" content="Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3). Features 90s retro UI, currency selection, and configuration saving.">
     <meta name="keywords" content="raid calculator, zfs calculator, hard drive cost, price per tb, storage calculator, raid 0, raid 1, raid 5, raid 6, raid 10, raid-z, raid-z1, raid-z2, raid-z3, retro ui, disk cost, nas calculator">
     <style>
         /* General body styling - 90s Edition Deluxe */
@@ -87,16 +87,15 @@
         }
         @media (min-width: 768px) { 
             .drive-entry {
-                /* drivlabel, drivename, drivecaplabel, drivecapinput, drivepricelabel, drivepriceinput, drivelinklabel, drivelinkinput, remover */
                 grid-template-columns: auto minmax(120px, 1.5fr) auto 130px auto 140px auto minmax(120px, 1fr) auto;
                 grid-template-areas: "drivelabel drivename drivecaplabel drivecapinput drivepricelabel drivepriceinput drivelinklabel drivelinkinput remover";
                 align-items: center; 
-                gap: 4px 8px; /* Increased column gap slightly for better separation */
+                gap: 4px 8px; 
             }
             .drive-entry .drive-identifier-label { grid-area: drivelabel; white-space: nowrap; padding-right: 5px;}
             .drive-entry input[id^="name-"] { grid-area: drivename; }
             .drive-entry label[for^="capacity-"] { grid-area: drivecaplabel; text-align: right; padding-right: 4px;}
-            .drive-entry input[id^="capacity-"] { grid-area: drivecapinput; width: 100%;} /* Input takes full width of its defined column */
+            .drive-entry input[id^="capacity-"] { grid-area: drivecapinput; width: 100%;} 
             .drive-entry label[for^="price-"] { grid-area: drivepricelabel; text-align: right; padding-right: 4px;}    
             .drive-entry input[id^="price-"] { grid-area: drivepriceinput; width: 100%;} 
             .drive-entry label[for^="link-"] { grid-area: drivelinklabel; text-align: right; padding-right: 4px;}    
@@ -135,15 +134,19 @@
             background-color: #ffffff; 
             border-radius: 0; 
             box-sizing: border-box;
-            /* width: 100%; Let grid column define width for specific inputs */
             font-family: Arial, Helvetica, sans-serif;
             font-size: 12px; 
             color: #000000;
         }
-        /* Ensure inputs that should take full width of their flexible column do so */
-        .drive-entry input[id^="name-"], .drive-entry input[id^="link-"] {
+        .drive-entry input[id^="name-"], .drive-entry input[id^="link-"],
+        .raid-config-section select { /* Ensure these take full width of their column */
             width: 100%;
         }
+        /* Specific widths for capacity and price inputs are handled by their grid column definition */
+        .drive-entry input[id^="capacity-"], .drive-entry input[id^="price-"] {
+             width: 100%; /* They will fill their specifically sized grid column */
+        }
+
 
         .raid-config-section input[type="checkbox"] {
             width: auto; 
@@ -177,11 +180,11 @@
         }
         .raid-config-section input[type="number"] { /* For "Drives in RAID" field */
             max-width: 80px; 
-            width: 80px; /* Explicit width */
+            width: 80px; 
         }
         .global-settings select { /* For Currency select */
             max-width: 70px;
-            width: 70px; /* Explicit width */
+            width: 70px; 
         }
 
 
@@ -230,15 +233,15 @@
             display: block;
             margin-bottom: 3px;
         }
-        .raid-config-section select {
-            width: 100%;
-        }
+      
          @media (min-width: 600px) {
-            .raid-config-section select {
+            .raid-config-section select { /* RAID type select */
                 min-width: 160px;
+                width: auto; /* Allow it to size based on content or flex item */
             }
             .raid-config-section input[type="number"] { /* For "Drives in RAID" field */
                 min-width: 70px;
+                 width: 80px; /* Keep explicit width */
             }
         }
 
@@ -249,6 +252,10 @@
             flex-wrap: wrap;
             margin-top: 6px; 
         }
+        .action-buttons.calculate-button-group { /* Specific class for calculate button group */
+            margin-top: 15px; /* Increased top margin */
+        }
+
         .action-buttons button, .config-buttons button {
             padding: 5px 10px; 
             background-color: #c0c0c0; 
@@ -278,6 +285,9 @@
          .action-buttons button#calculate:active { background-color: #006400; }
 
 
+        .load-config-section {
+            margin-top: 20px; /* Increased top margin for Config Manager */
+        }
         .load-config-section .input-field-group {
             flex-grow: 2; 
         }
@@ -531,7 +541,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Drive & RAID Cost Calculator ",
-      "description": "Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3).",
+      "description": "Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3). Features a 1990s retro UI, currency selection, and configuration saving.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "All (Web Browser)",
       "offers": {
@@ -605,7 +615,7 @@
                     <small>Reduces usable capacity by 20% for ZFS performance.</small>
                 </div>
             </section>
-            <div class="action-buttons">
+            <div class="action-buttons calculate-button-group">
                  <button id="calculate">CALCULATE!</button>
             </div>
 
@@ -626,7 +636,7 @@
 
 
             <section id="results" style="display: none;" aria-live="polite"> 
-                <h2 id="results-title">RESULTS:</h2> {/* Corrected: Added ID here */}
+                <h2 id="results-title">RESULTS:</h2> 
                 <div id="results-list"></div>
                 <div id="results-chart-container" style="display: none;">
                     <canvas id="results-chart" aria-label="Price per Terabyte Comparison Chart"></canvas>
@@ -752,7 +762,7 @@
         const zfs80RuleCheckbox = document.getElementById('zfs-80-rule');
         const loadConfigSelect = document.getElementById('load-config-select');
         const resultsChartContainer = document.getElementById('results-chart-container');
-        const resultsTitle = document.getElementById('results-title'); // Ensure this is defined globally if accessed early
+        const resultsTitle = document.getElementById('results-title'); 
 
 
         // --- Currency Functions ---
@@ -838,11 +848,9 @@
                 linkInput.style.gridArea = 'drivelinkinput';
                 if (removeBtn) removeBtn.style.gridArea = 'remover';
                 
-                // Labels for Capacity and Price are now always visible on desktop due to explicit grid areas.
-                // Only hide the Link label if its placeholder is sufficient.
                 capLabel.classList.remove('visually-hidden');
                 priceLabel.classList.remove('visually-hidden');
-                linkLabel.classList.add('visually-hidden'); // Link label can be hidden if placeholder is good
+                linkLabel.classList.add('visually-hidden'); 
 
             } else { 
                 identifierLabel.style.gridArea = 'drivelabel';
@@ -865,7 +873,7 @@
                 /* On desktop, .visually-hidden is applied by JS to specific labels if needed */
             }
             @media (max-width: 767px) { 
-                label.visually-hidden-desktop { /* This class is not used by JS anymore for cap/price */
+                label.visually-hidden-desktop { 
                     position: static !important; width: auto !important; height: auto !important; 
                     margin: 0 0 3px 0 !important; overflow: visible !important; 
                     clip: auto !important; border: 0 !important; display: block !important; 
@@ -1041,7 +1049,7 @@
         document.getElementById('calculate').addEventListener('click', function() {
             const resultsListDiv = document.getElementById('results-list');
             const summaryDiv = document.getElementById('summary');
-            const currentResultsTitle = document.getElementById('results-title'); // Use the globally defined resultsTitle
+            const currentResultsTitle = document.getElementById('results-title'); 
             const allDriveEntriesHTML = document.querySelectorAll('.drive-entry'); 
             const selectedRaidType = raidTypeSelect.value;
             const numDrivesForRaidArray = parseInt(drivesInRaidInput.value);
