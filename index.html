@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drive & RAID Cost Calculator - ZFS, Price/TB Tool</title>
+    <title>Drive & RAID Cost Calculator  - ZFS, Price/TB Tool</title>
     <meta name="description" content="Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3).">
     <meta name="keywords" content="raid calculator, zfs calculator, hard drive cost, price per tb, storage calculator, raid 0, raid 1, raid 5, raid 6, raid 10, raid-z, raid-z1, raid-z2, raid-z3, retro ui, disk cost, nas calculator">
     <style>
@@ -530,7 +530,7 @@
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "Drive & RAID Cost Calculator",
+      "name": "Drive & RAID Cost Calculator ",
       "description": "Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3).",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "All (Web Browser)",
@@ -551,7 +551,7 @@
 <main> 
     <div class="container">
         <div class="title-bar">
-             <h1>-= Hard Drive & RAID Cost Calculator 3000 =-</h1>
+             <h1>-= Hard Drive & RAID Cost Calculator =-</h1>
         </div>
         <div class="content-area">
             <section class="global-settings" aria-labelledby="global-settings-heading">
@@ -625,7 +625,8 @@
             </section>
 
 
-            <section id="results" style="display: none;" aria-live="polite"> <h2>RESULTS:</h2>
+            <section id="results" style="display: none;" aria-live="polite"> 
+                <h2 id="results-title">RESULTS:</h2> {/* Corrected: Added ID here */}
                 <div id="results-list"></div>
                 <div id="results-chart-container" style="display: none;">
                     <canvas id="results-chart" aria-label="Price per Terabyte Comparison Chart"></canvas>
@@ -751,6 +752,7 @@
         const zfs80RuleCheckbox = document.getElementById('zfs-80-rule');
         const loadConfigSelect = document.getElementById('load-config-select');
         const resultsChartContainer = document.getElementById('results-chart-container');
+        const resultsTitle = document.getElementById('results-title'); // Ensure this is defined globally if accessed early
 
 
         // --- Currency Functions ---
@@ -1039,7 +1041,7 @@
         document.getElementById('calculate').addEventListener('click', function() {
             const resultsListDiv = document.getElementById('results-list');
             const summaryDiv = document.getElementById('summary');
-            const resultsTitle = document.getElementById('results-title');
+            const currentResultsTitle = document.getElementById('results-title'); // Use the globally defined resultsTitle
             const allDriveEntriesHTML = document.querySelectorAll('.drive-entry'); 
             const selectedRaidType = raidTypeSelect.value;
             const numDrivesForRaidArray = parseInt(drivesInRaidInput.value);
@@ -1074,7 +1076,7 @@
             const validEnteredDrivesData = allEnteredDrivesData.filter(d => !d.error); 
 
             if (allDriveEntriesHTML.length === 0) {
-                resultsTitle.textContent = "RESULTS:";
+                if(currentResultsTitle) currentResultsTitle.textContent = "RESULTS:";
                 resultsListDiv.innerHTML = "<p>Hey! Add at least one drive, will ya?</p>";
                 return;
             }
@@ -1084,7 +1086,7 @@
             const chartBackgroundColors = []; 
 
             if (selectedRaidType === 'none') {
-                resultsTitle.textContent = "Individual Drive Analysis:";
+                if(currentResultsTitle) currentResultsTitle.textContent = "Individual Drive Analysis:";
                 if (validEnteredDrivesData.length === 0 && allEnteredDrivesData.length > 0) {
                     resultsListDiv.innerHTML = "<p style='color:red; font-weight:bold;'>ERROR: All entered drives have invalid capacity or price.</p>";
                     return;
@@ -1160,7 +1162,7 @@
 
 
             } else { 
-                resultsTitle.textContent = `${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} Array Analysis:`;
+                if(currentResultsTitle) currentResultsTitle.textContent = `${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} Array Analysis:`;
                 
                 if (isNaN(numDrivesForRaidArray) || numDrivesForRaidArray <= 0) {
                     resultsListDiv.innerHTML = "<p style='color:red; font-weight:bold;'>ERROR: Enter a valid number of drives for the RAID array.</p>";
