@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Drive & RAID Cost Calculator 3000 - ZFS, Price/TB Tool</title>
+    <meta name="description" content="Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3). Features 90s retro UI, currency selection, and configuration saving.">
+    <meta name="keywords" content="raid calculator, zfs calculator, hard drive cost, price per tb, storage calculator, raid 0, raid 1, raid 5, raid 6, raid 10, raid-z, raid-z1, raid-z2, raid-z3, retro ui, disk cost, nas calculator">
+    <style>
+        /* General body styling - 90s Edition Deluxe */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 8px; /* Slightly less padding */
+            background-color: #008080; /* Classic Teal background */
+            color: #000000;
+            font-size: 13px; /* Consistent small font */
+        }
+
+        /* Container for the calculator - Windowed App Style */
+        .container {
+            background-color: #c0c0c0; /* System Silver/Gray */
+            padding: 0; /* Padding will be inside content area */
+            border: 2px outset #ffffff;
+            box-shadow: 2px 2px 5px #808080; /* Subtle shadow for depth */
+            width: 100%;
+            max-width: 880px; /* Adjusted width */
+            margin: 10px auto;
+            box-sizing: border-box;
+        }
+        .title-bar {
+            background-color: #000080; /* Navy Blue for title bar */
+            color: #ffffff;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #000000;
+            text-align: left; /* Align title to left like old windows */
+        }
+        .title-bar h1 {
+             font-family: Arial, Helvetica, sans-serif; /* Use Arial for title bar text */
+             font-size: 14px;
+             color: #ffffff;
+             margin: 0;
+             padding: 0;
+             border-bottom: none; /* Remove h1's own border */
+             text-align: left;
+        }
+        .content-area {
+            padding: 10px; /* Padding for the actual content inside the window */
+        }
+
+
+        /* Styling for headings within content */
+        h2 { 
+            font-size: 16px; /* Slightly smaller H2 */
+            margin-top: 15px;
+            margin-bottom: 10px;
+            background-color: #808080; /* Medium Gray for section headers */
+            color: #ffffff;
+            padding: 3px 6px;
+            border: 1px outset #a0a0a0;
+            text-align: left;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        h3 { 
+            font-size: 14px; /* Smaller H3 */
+            color: #000000;
+            text-align: left;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #000000; 
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+        }
+
+        /* Styling for each drive entry block */
+        .drive-entry {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 6px; /* Reduced gap */
+            align-items: center; 
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 2px inset #808080; 
+            background-color: #d3d3d3; 
+        }
+        @media (min-width: 768px) { 
+            .drive-entry {
+                grid-template-columns: auto 1fr auto min-content auto min-content auto 1fr auto;
+                grid-template-areas: "drivelabel drivename drivecap drivecapvalue driveprice drivepricevalue drivelink drivelinkvalue remover";
+                align-items: center; 
+                gap: 4px 6px; /* Further reduced gap */
+            }
+            .drive-entry .drive-identifier-label { grid-area: drivelabel; white-space: nowrap;}
+            .drive-entry input[id^="name-"] { grid-area: drivename; }
+            .drive-entry label[for^="capacity-"] { grid-area: drivecap; }
+            .drive-entry input[id^="capacity-"] { grid-area: drivecapvalue; width:65px;} /* Slightly smaller */
+            .drive-entry label[for^="price-"] { grid-area: driveprice; }
+            .drive-entry input[id^="price-"] { grid-area: drivepricevalue; width:75px;} /* Slightly smaller */
+            .drive-entry label[for^="link-"] { grid-area: drivelink; }
+            .drive-entry input[id^="link-"] { grid-area: drivelinkvalue; }
+            .drive-entry .remove-drive { 
+                grid-area: remover; 
+                margin-left:auto;
+                align-self: center; 
+            }
+        }
+
+
+        .input-field-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 6px; 
+        }
+
+        .drive-entry label, .raid-config-section label, .global-settings label, .load-config-section label {
+            margin-bottom: 2px;
+            font-weight: bold; 
+            color: #000000;
+            font-size: 12px; /* Even smaller labels */
+        }
+
+        /* Inputs, Selects - 90s style */
+        .drive-entry input[type="number"],
+        .drive-entry input[type="text"],
+        .drive-entry input[type="url"], 
+        .raid-config-section select,
+        .raid-config-section input[type="number"],
+        .global-settings select,
+        .load-config-section select {
+            padding: 3px 4px; /* Reduced padding */
+            border: 1px inset #000000; /* Sharper inset */
+            background-color: #ffffff; 
+            border-radius: 0; 
+            box-sizing: border-box;
+            width: 100%; 
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px; /* Smaller font in inputs */
+            color: #000000;
+        }
+        .raid-config-section input[type="checkbox"] {
+            width: auto; 
+            margin-right: 4px; 
+            vertical-align: middle;
+            border: 1px solid #000000; 
+            appearance: checkbox; 
+            transform: scale(0.9); /* Make checkbox slightly smaller */
+        }
+        .input-field-group.zfs-rule label { 
+            display: inline-flex; 
+            align-items: center;
+            font-weight: normal; 
+            font-size: 12px;
+        }
+        .input-field-group.zfs-rule small {
+            font-size: 10px; /* Smaller small text */
+            color: #000000;
+            display: block; 
+            margin-top: 1px;
+        }
+
+        .drive-entry input:focus,
+        .raid-config-section select:focus,
+        .raid-config-section input:focus,
+        .global-settings select:focus,
+        .load-config-section select:focus {
+            border-color: #000080; 
+            outline: 1px solid #000080;
+            box-shadow: none;
+        }
+        .raid-config-section input[type="number"] {
+            max-width: 80px; 
+        }
+        .global-settings select {
+            max-width: 70px;
+        }
+
+
+        .drive-entry .remove-drive {
+            padding: 3px 6px; /* Smaller padding */
+            background-color: #c0c0c0; /* Match container */
+            color: #000000;
+            border: 2px outset #e0e0e0; 
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px; /* Smaller font */
+            height: auto; 
+        }
+        .drive-entry .remove-drive:active {
+            border-style: inset;
+        }
+        
+        .global-settings, .drive-input-section, .raid-config-section, .load-config-section, .results-section, .raid-explanations-section {
+            margin-bottom: 12px; /* Reduced margin */
+            padding: 8px; /* Reduced padding */
+            border: 2px groove #808080; 
+            background-color: #c0c0c0; /* Match main container */
+        }
+
+
+        .raid-config-section { 
+            margin-top: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .raid-config-section .input-field-group {
+             flex-grow: 1;
+             min-width: 150px; 
+        }
+        #zfs-80-rule-group { 
+            flex-basis: 100%; 
+            margin-top: 6px;
+        }
+
+
+        .raid-config-section label {
+            display: block;
+            margin-bottom: 3px;
+        }
+        .raid-config-section select {
+            width: 100%;
+        }
+         @media (min-width: 600px) {
+            .raid-config-section select {
+                min-width: 160px;
+            }
+            .raid-config-section input[type="number"] {
+                min-width: 70px;
+            }
+        }
+
+        /* Buttons - 90s style */
+        .action-buttons, .config-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px; 
+        }
+        .action-buttons button, .config-buttons button {
+            padding: 5px 10px; /* Smaller padding */
+            background-color: #c0c0c0; 
+            color: #000000;
+            border: 2px outset #dfdfdf; /* Lighter outset for more pop */
+            border-bottom-color: #808080; /* Darker bottom/right for 3D */
+            border-right-color: #808080;
+            border-radius: 0;
+            cursor: pointer;
+            margin-top: 4px; 
+            font-size: 12px; /* Smaller font */
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .action-buttons button:active, .config-buttons button:active {
+            border-style: inset;
+            background-color: #b0b0b0; 
+            border-top-color: #808080;
+            border-left-color: #808080;
+            border-bottom-color: #dfdfdf;
+            border-right-color: #dfdfdf;
+        }
+         .action-buttons button#calculate { 
+            background-color: #008000; 
+            color: #ffffff;
+         }
+         .action-buttons button#calculate:active { background-color: #006400; }
+
+
+        .load-config-section .input-field-group {
+            flex-grow: 2; 
+        }
+        .load-config-section .config-buttons {
+            flex-grow: 1;
+            align-items: flex-end; 
+        }
+        .load-config-section .config-buttons button {
+            width: 100%; 
+        }
+         @media (min-width: 600px) {
+             .load-config-section {
+                display: flex;
+                gap: 8px;
+                align-items: flex-end;
+             }
+             .load-config-section .config-buttons button {
+                width: auto;
+             }
+         }
+
+
+        #results { 
+            margin-top: 15px;
+            padding: 4px; 
+            border: 2px inset #808080;
+            background-color: #c0c0c0; /* Match container */
+        }
+        #results-list {
+            padding: 8px;
+            background-color: #ffffff; 
+            border: 1px solid #000000;
+            margin: 4px 0; 
+            font-size: 12px; /* Smaller font for results list */
+        }
+        #results-chart-container {
+            padding: 8px;
+            margin-top: 6px;
+            background-color: #c0c0c0; 
+            border: 1px solid #000000;
+            margin: 4px 0;
+        }
+
+
+        .result-item {
+            padding: 4px 6px; /* Tighter padding */
+            border-bottom: 1px solid #808080; 
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item.best-value {
+            background-color: #00ff00; /* Brighter green */
+            color: #000000;
+            font-weight: bold;
+        }
+        .result-item span {
+            flex-basis: calc(25% - 6px);
+            min-width: 90px;
+            text-align: left;
+        }
+        .result-item span.drive-name-result {
+            flex-basis: calc(35% - 6px); 
+            font-weight: bold;
+        }
+         .result-item span.drive-name-result a {
+            color: #0000FF; 
+            text-decoration: underline;
+        }
+        .result-item span.price-per-tb {
+            font-weight: bold;
+        }
+
+        .raid-summary-item {
+            padding: 4px 0;
+            font-size: 12px;
+            color: #000000;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .raid-summary-item strong {
+            color: #000000;
+            min-width: 200px; 
+        }
+         .raid-summary-item .value {
+            flex-grow: 1;
+        }
+        .raid-summary-item.highlight-zfs-rule {
+            background-color: #ffffc0; /* Lighter yellow */
+            color: #000000;
+            padding: 2px 3px;
+            border: 1px dotted #000000;
+            margin-top: 1px;
+            margin-bottom: 1px;
+        }
+
+
+        .currency-symbol-display { 
+            margin-right: 1px;
+        }
+
+        #summary { /* Status Bar Style */
+            margin-top: 8px; 
+            font-weight: normal; /* Normal weight for status bar */
+            font-size: 12px;
+            padding: 3px 6px;
+            background-color: #c0c0c0; 
+            color: #000000; 
+            border: 1px inset #808080; /* Inset border for status bar */
+            text-align: left; /* Align left */
+            height: 20px; /* Fixed height like a status bar */
+            line-height: 14px; /* Vertically center text */
+        }
+        #summary p { margin: 0; }
+        #summary strong { font-weight: bold; } /* Allow bold within status bar */
+
+
+        .drive-identifier-label {
+            font-weight: bold;
+            color: #000000;
+            margin-right: 2px;
+        }
+
+        .explanation-item {
+            background-color: #c0c0c0; /* Match container */
+            padding: 8px;
+            border: 1px solid #000000;
+            margin-bottom: 8px;
+        }
+        .explanation-item h3 {
+            margin-top: 0;
+            color: #000080; 
+            font-size: 14px; /* Smaller H3 */
+            border-bottom: 1px solid #000000;
+        }
+        .explanation-item p {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #000000;
+            margin-bottom: 3px;
+        }
+        .explanation-item ul {
+            list-style-type: square; 
+            margin-left: 12px;
+            padding-left: 0;
+            font-size: 11px;
+            color: #000000;
+        }
+        .explanation-item li {
+            margin-bottom: 1px;
+        }
+
+
+        @media (max-width: 767px) { 
+            .container {
+                margin: 4px;
+                padding: 0; /* Container padding removed, content-area has it */
+            }
+            .content-area {
+                padding: 8px;
+            }
+            h1 { font-size: 18px; } /* Title bar H1 */
+            .title-bar h1 { font-size: 13px; }
+            h2 { font-size: 15px; }
+
+            .drive-entry {
+                grid-template-columns: 1fr;
+                 grid-template-areas: "drivelabel" "drivename" "drivecaplabel" "drivecapvalue" "drivepricelabel" "drivepricevalue" "drivelinklabel" "drivelinkvalue" "remover";
+            }
+             .drive-entry label, .drive-entry input, .drive-entry .remove-drive {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+             .drive-entry input[id^="capacity-"], .drive-entry input[id^="price-"], .drive-entry input[id^="link-"] {
+                width: 100%;
+            }
+            .drive-entry .remove-drive {
+                margin-left: 0;
+                text-align: center;
+            }
+            .drive-entry label[for^="capacity-"], .drive-entry label[for^="price-"], .drive-entry label[for^="link-"] {
+                position: static; width: auto; height: auto; margin: 0 0 2px 0; overflow: visible; clip: auto; border: 0;
+            }
+
+
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .result-item span {
+                flex-basis: 100%;
+                min-width: unset;
+                margin-bottom: 2px;
+            }
+            .result-item span.drive-name-result {
+                flex-basis: 100%;
+            }
+            .action-buttons, .config-buttons {
+                flex-direction: column; 
+            }
+            .action-buttons button, .config-buttons button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 4px;
+            }
+            .action-buttons button:last-of-type, .config-buttons button:last-of-type {
+                margin-bottom: 0;
+            }
+            .raid-config-section {
+                flex-direction: column; 
+                align-items: stretch; 
+            }
+            .raid-config-section select, .raid-config-section input[type="number"] {
+                width: 100%;
+                max-width: none; 
+                min-width: 0;
+            }
+            .raid-config-section .input-field-group {
+                min-width: 0; 
+            }
+            #zfs-80-rule-group {
+                flex-basis: auto; 
+            }
+
+            .raid-summary-item strong {
+                min-width: 100%;
+                margin-bottom: 1px;
+            }
+            .load-config-section {
+                flex-direction: column;
+            }
+            .load-config-section .config-buttons {
+                 width: 100%;
+            }
+        }
+        .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; border: 0 !important; }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Retro Drive & RAID Cost Calculator 3000",
+      "description": "Calculate hard drive costs, price per TB, and usable capacity for various RAID configurations including RAID 0, 1, 5, 6, 10, and ZFS (RAID-Z1, Z2, Z3). Features a 1990s retro UI, currency selection, and configuration saving.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All (Web Browser)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0" 
+      },
+      "keywords": "raid calculator, zfs calculator, hard drive cost, price per tb, storage calculator, raid 0, raid 1, raid 5, raid 6, raid 10, raid-z, raid-z1, raid-z2, raid-z3, retro ui, disk cost, nas calculator",
+      "hasPart": [
+        { "@type": "WebPageElement", "name": "Drive Input Section" },
+        { "@type": "WebPageElement", "name": "RAID Configuration Section" },
+        { "@type": "WebPageElement", "name": "Results Display" }
+      ]
+    }
+    </script>
+</head>
+<body>
+<main> 
+    <div class="container">
+        <div class="title-bar">
+             <h1>-= Hard Drive & RAID Cost Calculator 3000 =-</h1>
+        </div>
+        <div class="content-area">
+            <section class="global-settings" aria-labelledby="global-settings-heading">
+                <h2 id="global-settings-heading" class="visually-hidden">Global Settings</h2>
+                <div class="input-field-group">
+                    <label for="currency-select">Currency:</label>
+                    <select id="currency-select">
+                        <option value="$">$ (USD)</option>
+                        <option value="€">€ (EUR)</option>
+                        <option value="£">£ (GBP)</option>
+                        <option value="¥">¥ (JPY)</option>
+                        <option value="₹">₹ (INR)</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="drive-input-section" aria-labelledby="drive-input-heading">
+                 <h2 id="drive-input-heading">DRIVE INPUTS:</h2>
+                <div id="drive-inputs">
+                    </div>
+                <div class="action-buttons">
+                    <button id="add-drive">[+] Add Drive</button>
+                </div>
+            </section>
+
+            <section class="raid-config-section" aria-labelledby="raid-config-heading">
+                <h2 id="raid-config-heading">RAID SETUP:</h2>
+                <div class="input-field-group">
+                    <label for="raid-type">RAID Configuration:</label>
+                    <select id="raid-type">
+                        <option value="none">None (Individual Drives)</option>
+                        <option value="raid0">RAID 0 (Striping)</option>
+                        <option value="raid1">RAID 1 (Mirroring)</option>
+                        <option value="raid5">RAID 5 (Single Parity)</option>
+                        <option value="raid6">RAID 6 (Dual Parity)</option>
+                        <option value="raid10">RAID 10 (Stripe of Mirrors)</option>
+                        <option value="raidz1">RAID-Z1 (Single Parity - ZFS)</option>
+                        <option value="raidz2">RAID-Z2 (Dual Parity - ZFS)</option>
+                        <option value="raidz3">RAID-Z3 (Triple Parity - ZFS)</option>
+                    </select>
+                </div>
+                <div class="input-field-group">
+                    <label for="drives-in-raid">Drives in RAID:</label>
+                    <input type="number" id="drives-in-raid" min="1" step="1" placeholder="e.g., 5" disabled>
+                </div>
+                <div class="input-field-group zfs-rule" id="zfs-80-rule-group" style="display: none;">
+                    <label for="zfs-80-rule">
+                        <input type="checkbox" id="zfs-80-rule" name="zfs-80-rule">
+                        Apply 80% ZFS Rule
+                    </label>
+                    <small>Reduces usable capacity by 20% for ZFS performance.</small>
+                </div>
+            </section>
+            <div class="action-buttons">
+                 <button id="calculate">CALCULATE!</button>
+            </div>
+
+            <section class="load-config-section" aria-labelledby="load-config-heading">
+                <h2 id="load-config-heading">CONFIG MANAGER:</h2>
+                <div class="input-field-group">
+                    <label for="load-config-select">Manage Configurations:</label>
+                    <select id="load-config-select">
+                        <option value="">-- Select Saved Setup --</option>
+                    </select>
+                </div>
+                <div class="config-buttons">
+                    <button id="save-config">Save Current</button>
+                    <button id="load-config">Load Selected</button>
+                    <button id="delete-config">Delete Selected</button>
+                </div>
+            </section>
+
+
+            <section id="results" style="display: none;" aria-live="polite"> <h2>RESULTS:</h2>
+                <div id="results-list"></div>
+                <div id="results-chart-container" style="display: none;">
+                    <canvas id="results-chart" aria-label="Price per Terabyte Comparison Chart"></canvas>
+                </div>
+                <div id="summary" style="display: none;"></div>
+            </section>
+
+            <section class="raid-explanations-section" aria-labelledby="raid-explanations-heading">
+                 <h2 id="raid-explanations-heading">RAID Type Info:</h2>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">None (Individual Drives)</h3>
+                    <p itemprop="articleBody">Each drive is treated as a separate storage unit. This mode is for comparing the cost-effectiveness of individual drives.</p>
+                    <ul>
+                        <li><strong>Pros:</strong> Simple, full capacity of each drive is usable.</li>
+                        <li><strong>Cons:</strong> No data redundancy, no performance increase from array. Failure of one drive means data on that drive is lost.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">RAID 0 (Striping)</h3>
+                    <p itemprop="articleBody">Combines multiple drives into a single larger, faster volume by writing data across drives in "stripes".</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 2</li>
+                        <li><strong>Usable Capacity:</strong> Sum of all drive capacities.</li>
+                        <li><strong>Pros:</strong> Increased performance (read/write speed). Full capacity utilization.</li>
+                        <li><strong>Cons:</strong> No fault tolerance. If one drive fails, all data in the array is lost.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">RAID 1 (Mirroring)</h3>
+                    <p itemprop="articleBody">Writes identical data to two or more drives simultaneously, creating a "mirror".</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 2</li>
+                        <li><strong>Usable Capacity:</strong> Capacity of the smallest drive (or total capacity / number of drives if all are same size and setup is simple mirror). For this calculator with potentially mixed sizes, we use Total Raw / 2 for a basic 2-drive mirror concept, or smallest for N-way. For simplicity, we'll assume Total Raw / 2.</li>
+                        <li><strong>Pros:</strong> High fault tolerance (data survives if one drive fails). Good read performance.</li>
+                        <li><strong>Cons:</strong> Low capacity utilization (50% of total raw capacity). Write performance can be slower.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">RAID 5 (Single Parity)</h3>
+                    <p itemprop="articleBody">Stripes data and parity information across three or more drives. Provides a balance of performance, capacity, and redundancy.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 3</li>
+                        <li><strong>Usable Capacity:</strong> (Number of Drives - 1) &times; Capacity of Smallest Drive.</li>
+                        <li><strong>Pros:</strong> Good read performance, decent write performance. Fault tolerance (can withstand failure of one drive). Efficient capacity usage compared to RAID 1.</li>
+                        <li><strong>Cons:</strong> Write performance can be slower due to parity calculation. Rebuild times can be long if a drive fails.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">RAID 6 (Dual Parity)</h3>
+                    <p itemprop="articleBody">Similar to RAID 5, but uses two independent parity blocks. Can withstand the failure of two drives simultaneously.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 4</li>
+                        <li><strong>Usable Capacity:</strong> (Number of Drives - 2) &times; Capacity of Smallest Drive.</li>
+                        <li><strong>Pros:</strong> Higher fault tolerance than RAID 5. Good read performance.</li>
+                        <li><strong>Cons:</strong> Slower write performance than RAID 5 due to dual parity calculations. Lower capacity utilization than RAID 5. Longer rebuild times.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="RAID Technology">
+                    <h3 itemprop="headline">RAID 10 (Stripe of Mirrors / RAID 1+0)</h3>
+                    <p itemprop="articleBody">Combines mirroring and striping. Data is first mirrored onto pairs of drives, and then these mirrored pairs are striped together.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 4 (must be an even number)</li>
+                        <li><strong>Usable Capacity:</strong> Total Raw Capacity / 2.</li>
+                        <li><strong>Pros:</strong> Good performance (both read and write) and good fault tolerance (can withstand failure of one drive in each mirrored pair).</li>
+                        <li><strong>Cons:</strong> Lower capacity utilization (50% of total raw capacity). Requires more drives.</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="ZFS RAID Technology">
+                    <h3 itemprop="headline">RAID-Z1 (Single Parity - ZFS)</h3>
+                    <p itemprop="articleBody">ZFS equivalent of RAID 5. Uses variable stripe width and copy-on-write, offering better data integrity and protection against write holes compared to traditional RAID 5.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 3 (recommended for parity)</li>
+                        <li><strong>Usable Capacity:</strong> (Number of Drives - 1) &times; Capacity of Smallest Drive. (Note: ZFS has a small metadata overhead not accounted for here, but this is a common estimation. For performance, keeping usage under 80% of this value is often recommended.)</li>
+                        <li><strong>Pros:</strong> Good data integrity, protection against write holes, efficient capacity. Can withstand failure of one drive.</li>
+                        <li><strong>Cons:</strong> Performance can degrade with many small files. Adding drives to expand an existing RAID-Z1 vdev is complex (often requires replacing all drives or adding a new vdev).</li>
+                    </ul>
+                </article>
+                <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="ZFS RAID Technology">
+                    <h3 itemprop="headline">RAID-Z2 (Dual Parity - ZFS)</h3>
+                    <p itemprop="articleBody">ZFS equivalent of RAID 6. Provides dual parity for increased data protection.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 4 (recommended for parity)</li>
+                        <li><strong>Usable Capacity:</strong> (Number of Drives - 2) &times; Capacity of Smallest Drive. (See 80% note for RAID-Z1)</li>
+                        <li><strong>Pros:</strong> Excellent data integrity, can withstand failure of two drives.</li>
+                        <li><strong>Cons:</strong> Higher capacity overhead than RAID-Z1. Expansion complexity similar to RAID-Z1.</li>
+                    </ul>
+                </article>
+                 <article class="explanation-item" itemprop="hasPart" itemscope itemtype="https://schema.org/Article">
+                    <meta itemprop="articleSection" content="ZFS RAID Technology">
+                    <h3 itemprop="headline">RAID-Z3 (Triple Parity - ZFS)</h3>
+                    <p itemprop="articleBody">ZFS specific, provides triple parity for very high data protection, suitable for large arrays where rebuild times are long.</p>
+                    <ul>
+                        <li><strong>Minimum Drives:</strong> 5 (recommended for parity)</li>
+                        <li><strong>Usable Capacity:</strong> (Number of Drives - 3) &times; Capacity of Smallest Drive. (See 80% note for RAID-Z1)</li>
+                        <li><strong>Pros:</strong> Extremely high data integrity, can withstand failure of three drives.</li>
+                        <li><strong>Cons:</strong> Highest capacity overhead. Expansion complexity similar to RAID-Z1/Z2.</li>
+                    </ul>
+                </article>
+            </section>
+        </div>
+    </div>
+</main>
+
+    <script>
+        let driveIdCounter = 0;
+        let currentCurrencySymbol = '$'; 
+        let resultsChart = null; 
+
+        // DOM Elements
+        const currencySelect = document.getElementById('currency-select');
+        const driveInputsDiv = document.getElementById('drive-inputs');
+        const raidTypeSelect = document.getElementById('raid-type');
+        const drivesInRaidInput = document.getElementById('drives-in-raid');
+        const zfs80RuleGroup = document.getElementById('zfs-80-rule-group');
+        const zfs80RuleCheckbox = document.getElementById('zfs-80-rule');
+        const loadConfigSelect = document.getElementById('load-config-select');
+        const resultsChartContainer = document.getElementById('results-chart-container');
+
+
+        // --- Currency Functions ---
+        function updateCurrencySymbol(newSymbol) {
+            currentCurrencySymbol = newSymbol;
+            document.querySelectorAll('input[placeholder*="Price ("]').forEach(input => {
+                input.placeholder = `Price (${currentCurrencySymbol})`;
+            });
+            document.querySelectorAll('.currency-symbol-display').forEach(span => {
+                span.textContent = currentCurrencySymbol;
+            });
+        }
+
+        currencySelect.addEventListener('change', function() {
+            updateCurrencySymbol(this.value);
+            const driveEntries = document.querySelectorAll('.drive-entry');
+            driveEntries.forEach(entry => {
+                const idSuffix = entry.id.split('-')[2];
+                const priceInput = entry.querySelector(`#price-${idSuffix}`);
+                if (priceInput) {
+                    priceInput.placeholder = `Price (${currentCurrencySymbol})`;
+                }
+                // Update symbol in label if it exists and is visible
+                const priceLabel = entry.querySelector(`label[for="price-${idSuffix}"]`);
+                if (priceLabel){
+                    const symbolSpan = priceLabel.querySelector('.currency-symbol-display');
+                    if(symbolSpan) symbolSpan.textContent = currentCurrencySymbol;
+                }
+            });
+        });
+
+
+        // --- Drive Entry Functions ---
+        function addDriveEntry(isFirst = false, driveData = null) {
+            driveIdCounter++;
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('drive-entry');
+            newEntry.setAttribute('id', `drive-entry-${driveIdCounter}`);
+
+            // Ensure currency symbol in label is correct from the start
+            newEntry.innerHTML = `
+                <span class="drive-identifier-label">Drive ${driveIdCounter}:</span>
+                <input type="text" id="name-${driveIdCounter}" placeholder="Optional: Drive Name" title="Custom name for this drive" value="${driveData?.name || ''}">
+
+                <label for="capacity-${driveIdCounter}" class="visually-hidden-desktop" id="label-capacity-${driveIdCounter}">Capacity (TB):</label>
+                <input type="number" id="capacity-${driveIdCounter}" step="0.01" min="0.01" placeholder="Capacity (TB)" title="Drive Capacity in Terabytes" value="${driveData?.capacity || ''}" aria-labelledby="label-capacity-${driveIdCounter} drive-identifier-label-${driveIdCounter}">
+
+                <label for="price-${driveIdCounter}" class="visually-hidden-desktop" id="label-price-${driveIdCounter}">Price (<span class="currency-symbol-display">${currentCurrencySymbol}</span>):</label>
+                <input type="number" id="price-${driveIdCounter}" step="0.01" min="0.01" placeholder="Price (${currentCurrencySymbol})" title="Price of this drive" value="${driveData?.price || ''}" aria-labelledby="label-price-${driveIdCounter} drive-identifier-label-${driveIdCounter}">
+                
+                <label for="link-${driveIdCounter}" class="visually-hidden-desktop" id="label-link-${driveIdCounter}">Link:</label>
+                <input type="url" id="link-${driveIdCounter}" placeholder="Optional: Link to Drive" title="Direct link to the drive product page" value="${driveData?.link || ''}" aria-labelledby="label-link-${driveIdCounter} drive-identifier-label-${driveIdCounter}">
+
+                ${!isFirst ? `<button type="button" class="remove-drive" onclick="removeDriveEntry(${driveIdCounter})">X</button>` : ''}
+            `;
+            // Add unique ID to identifier label for aria-labelledby
+            newEntry.querySelector('.drive-identifier-label').id = `drive-identifier-label-${driveIdCounter}`;
+            
+            driveInputsDiv.appendChild(newEntry);
+            applyDriveEntryLayout(newEntry); 
+        }
+
+        function applyDriveEntryLayout(entryElement) {
+            const identifierLabel = entryElement.querySelector('.drive-identifier-label');
+            const nameInput = entryElement.querySelector(`input[id^="name-"]`);
+            const capLabel = entryElement.querySelector(`label[for^="capacity-"]`);
+            const capInput = entryElement.querySelector(`input[id^="capacity-"]`);
+            const priceLabel = entryElement.querySelector(`label[for^="price-"]`);
+            const priceInput = entryElement.querySelector(`input[id^="price-"]`);
+            const linkLabel = entryElement.querySelector(`label[for^="link-"]`);
+            const linkInput = entryElement.querySelector(`input[id^="link-"]`);
+            const removeBtn = entryElement.querySelector('.remove-drive');
+
+
+            if (window.innerWidth >= 768) { 
+                identifierLabel.style.gridArea = 'drivelabel';
+                nameInput.style.gridArea = 'drivename';
+                capLabel.style.gridArea = 'drivecap';
+                capInput.style.gridArea = 'drivecapvalue';
+                priceLabel.style.gridArea = 'driveprice';
+                priceInput.style.gridArea = 'drivepricevalue';
+                linkLabel.style.gridArea = 'drivelink';
+                linkInput.style.gridArea = 'drivelinkvalue';
+                if (removeBtn) removeBtn.style.gridArea = 'remover';
+                [capLabel, priceLabel, linkLabel].forEach(lbl => lbl.classList.add('visually-hidden'));
+
+            } else { 
+                identifierLabel.style.gridArea = 'drivelabel';
+                nameInput.style.gridArea = 'drivename';
+                capLabel.style.gridArea = 'drivecaplabel'; 
+                capInput.style.gridArea = 'drivecapvalue';
+                priceLabel.style.gridArea = 'drivepricelabel'; 
+                priceInput.style.gridArea = 'drivepricevalue';
+                linkLabel.style.gridArea = 'drivelinklabel';
+                linkInput.style.gridArea = 'drivelinkvalue';
+                if (removeBtn) removeBtn.style.gridArea = 'remover';
+                [capLabel, priceLabel, linkLabel].forEach(lbl => lbl.classList.remove('visually-hidden'));
+            }
+        }
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.innerHTML = `
+            .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; border: 0 !important; }
+            @media (min-width: 768px) { 
+                /* On desktop, .visually-hidden is applied by JS to specific labels */
+            }
+            @media (max-width: 767px) { 
+                /* On mobile, ensure labels meant to be hidden on desktop are visible if they don't have .visually-hidden */
+                label.visually-hidden-desktop { 
+                    position: static !important; width: auto !important; height: auto !important; 
+                    margin: 0 0 3px 0 !important; overflow: visible !important; 
+                    clip: auto !important; border: 0 !important; display: block !important; 
+                }
+                .drive-entry { grid-template-areas: "drivelabel" "drivename" "drivecaplabel" "drivecapvalue" "drivepricelabel" "drivepricevalue" "drivelinklabel" "drivelinkvalue" "remover" !important; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.drive-entry').forEach(applyDriveEntryLayout);
+        });
+
+
+        function removeDriveEntry(driveIdNum) {
+            const driveEntryToRemove = document.getElementById(`drive-entry-${driveIdNum}`);
+            if (driveEntryToRemove) {
+                driveEntryToRemove.remove();
+                const remainingEntries = document.querySelectorAll('.drive-entry');
+                remainingEntries.forEach((entry, index) => {
+                    const currentIdSuffix = entry.id.split('-')[2];
+                    entry.querySelector('.drive-identifier-label').textContent = `Drive ${index + 1}:`;
+                    entry.querySelector('.drive-identifier-label').id = `drive-identifier-label-${currentIdSuffix}`; // Keep ID consistent for aria
+                });
+                 if (remainingEntries.length === 0) {
+                    driveIdCounter = 0; 
+                }
+            }
+        }
+
+        raidTypeSelect.addEventListener('change', function() {
+            if (this.value === 'none') {
+                drivesInRaidInput.disabled = true;
+                drivesInRaidInput.value = ''; 
+                zfs80RuleGroup.style.display = 'none';
+                zfs80RuleCheckbox.checked = false;
+            } else {
+                drivesInRaidInput.disabled = false;
+                if (this.value.startsWith('raidz')) {
+                    zfs80RuleGroup.style.display = 'block'; 
+                } else {
+                    zfs80RuleGroup.style.display = 'none';
+                    zfs80RuleCheckbox.checked = false;
+                }
+            }
+        });
+
+        document.getElementById('add-drive').addEventListener('click', () => {
+            const driveEntries = document.querySelectorAll('.drive-entry');
+            addDriveEntry(driveEntries.length === 0);
+        });
+
+        const CONFIG_STORAGE_KEY = 'retroDriveCalculatorConfigs_v3'; // Incremented version for new structure if needed
+
+        function getSavedConfigs() {
+            return JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY)) || [];
+        }
+
+        function saveConfigs(configs) {
+            localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(configs));
+        }
+
+        function populateLoadConfigSelect() {
+            const configs = getSavedConfigs();
+            loadConfigSelect.innerHTML = '<option value="">-- Select Saved Setup --</option>'; 
+            configs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config.name;
+                option.textContent = config.name;
+                loadConfigSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('save-config').addEventListener('click', () => {
+            const configName = prompt("Enter a name for this configuration (e.g., My NAS Build):");
+            if (!configName || configName.trim() === "") {
+                alert("Configuration name cannot be empty.");
+                return;
+            }
+
+            const drives = [];
+            document.querySelectorAll('.drive-entry').forEach(entry => {
+                const idSuffix = entry.id.split('-')[2];
+                drives.push({
+                    name: entry.querySelector(`#name-${idSuffix}`).value.trim(),
+                    capacity: parseFloat(entry.querySelector(`#capacity-${idSuffix}`).value),
+                    price: parseFloat(entry.querySelector(`#price-${idSuffix}`).value),
+                    link: entry.querySelector(`#link-${idSuffix}`).value.trim() 
+                });
+            });
+
+            const currentConfig = {
+                name: configName.trim(),
+                currency: currentCurrencySymbol,
+                drives: drives,
+                raidType: raidTypeSelect.value,
+                drivesInRaid: parseInt(drivesInRaidInput.value) || 0,
+                applyZfs80Rule: zfs80RuleCheckbox.checked
+            };
+
+            const configs = getSavedConfigs();
+            const existingConfigIndex = configs.findIndex(c => c.name === currentConfig.name);
+            if (existingConfigIndex > -1) {
+                if (confirm(`Configuration "${currentConfig.name}" already exists. Overwrite?`)) {
+                    configs[existingConfigIndex] = currentConfig;
+                } else {
+                    return;
+                }
+            } else {
+                configs.push(currentConfig);
+            }
+            saveConfigs(configs);
+            populateLoadConfigSelect();
+            alert(`Configuration "${currentConfig.name}" has been saved, boss!`);
+        });
+
+        document.getElementById('load-config').addEventListener('click', () => {
+            const selectedName = loadConfigSelect.value;
+            if (!selectedName) {
+                alert("Select a configuration to load first, alright?");
+                return;
+            }
+            const configs = getSavedConfigs();
+            const configToLoad = configs.find(c => c.name === selectedName);
+
+            if (configToLoad) {
+                driveInputsDiv.innerHTML = '';
+                driveIdCounter = 0;
+
+                currencySelect.value = configToLoad.currency;
+                updateCurrencySymbol(configToLoad.currency); 
+
+                configToLoad.drives.forEach((driveData, index) => {
+                    addDriveEntry(index === 0, driveData);
+                });
+                
+                const remainingEntries = document.querySelectorAll('.drive-entry');
+                remainingEntries.forEach((entry, index) => {
+                    const currentIdSuffix = entry.id.split('-')[2];
+                    entry.querySelector('.drive-identifier-label').textContent = `Drive ${index + 1}:`;
+                    entry.querySelector('.drive-identifier-label').id = `drive-identifier-label-${currentIdSuffix}`;
+                    applyDriveEntryLayout(entry); 
+                });
+
+
+                raidTypeSelect.value = configToLoad.raidType;
+                drivesInRaidInput.value = configToLoad.drivesInRaid || '';
+                zfs80RuleCheckbox.checked = configToLoad.applyZfs80Rule;
+
+                raidTypeSelect.dispatchEvent(new Event('change')); 
+                
+                alert(`Configuration "${configToLoad.name}" loaded up!`);
+            } else {
+                alert("Error: Couldn't find that configuration, sorry!");
+            }
+        });
+
+        document.getElementById('delete-config').addEventListener('click', () => {
+            const selectedName = loadConfigSelect.value;
+            if (!selectedName) {
+                alert("Select a configuration to delete, partner.");
+                return;
+            }
+            if (confirm(`Are you sure you want to delete configuration "${selectedName}"? No take-backs!`)) {
+                let configs = getSavedConfigs();
+                configs = configs.filter(c => c.name !== selectedName);
+                saveConfigs(configs);
+                populateLoadConfigSelect();
+                alert(`Configuration "${selectedName}" is history!`);
+            }
+        });
+
+
+        document.getElementById('calculate').addEventListener('click', function() {
+            const resultsListDiv = document.getElementById('results-list');
+            const summaryDiv = document.getElementById('summary');
+            const resultsTitle = document.getElementById('results-title');
+            const allDriveEntriesHTML = document.querySelectorAll('.drive-entry'); 
+            const selectedRaidType = raidTypeSelect.value;
+            const numDrivesForRaidArray = parseInt(drivesInRaidInput.value);
+            const applyZfs80Rule = zfs80RuleCheckbox.checked && selectedRaidType.startsWith('raidz');
+
+            resultsListDiv.innerHTML = ''; 
+            summaryDiv.innerHTML = '';
+            summaryDiv.style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            resultsChartContainer.style.display = 'none'; 
+
+            let allEnteredDrivesData = []; 
+            allDriveEntriesHTML.forEach((entry, index) => {
+                const idSuffix = entry.id.split('-')[2];
+                const nameInput = entry.querySelector(`#name-${idSuffix}`);
+                const capacityInput = entry.querySelector(`#capacity-${idSuffix}`);
+                const priceInput = entry.querySelector(`#price-${idSuffix}`);
+                const linkInput = entry.querySelector(`#link-${idSuffix}`);
+
+                const customName = nameInput.value.trim() || `Drive ${entry.querySelector('.drive-identifier-label').textContent.replace(':', '')}`;
+                const capacity = parseFloat(capacityInput.value);
+                const price = parseFloat(priceInput.value);
+                const link = linkInput.value.trim(); 
+
+                if (isNaN(capacity) || capacity <= 0 || isNaN(price) || price <= 0) {
+                    allEnteredDrivesData.push({ name: customName, capacity: NaN, price: NaN, link: link, idSuffix: idSuffix, error: true });
+                    return;
+                }
+                allEnteredDrivesData.push({ name: customName, capacity: capacity, price: price, link: link, idSuffix: idSuffix, error: false });
+            });
+
+            const validEnteredDrivesData = allEnteredDrivesData.filter(d => !d.error); 
+
+            if (allDriveEntriesHTML.length === 0) {
+                resultsTitle.textContent = "RESULTS:";
+                resultsListDiv.innerHTML = "<p>Hey! Add at least one drive, will ya?</p>";
+                return;
+            }
+            
+            const chartLabels = [];
+            const chartData = [];
+            const chartBackgroundColors = []; 
+
+            if (selectedRaidType === 'none') {
+                resultsTitle.textContent = "Individual Drive Analysis:";
+                if (validEnteredDrivesData.length === 0 && allEnteredDrivesData.length > 0) {
+                    resultsListDiv.innerHTML = "<p style='color:red; font-weight:bold;'>ERROR: All entered drives have invalid capacity or price.</p>";
+                    return;
+                }
+                 if (validEnteredDrivesData.length === 0) {
+                    resultsListDiv.innerHTML = "<p>No valid drives to analyze, buddy.</p>";
+                    return;
+                }
+
+                let bestPricePerTB = Infinity;
+                let bestDriveNames = []; 
+
+                validEnteredDrivesData.forEach(drive => {
+                    const resultItem = document.createElement('div');
+                    resultItem.classList.add('result-item');
+                    const pricePerTB = drive.price / drive.capacity;
+                    
+                    let nameHTML = drive.name;
+                    if (drive.link) {
+                        try {
+                            new URL(drive.link); 
+                             nameHTML = `<a href="${drive.link}" target="_blank" title="Go to product page for ${drive.name}">${drive.name}</a>`;
+                        } catch (_) { /* Invalid URL, do nothing, nameHTML remains drive.name */ }
+                    }
+
+                    resultItem.innerHTML = `
+                        <span class="drive-name-result">${nameHTML}</span>
+                        <span>Cap: ${drive.capacity.toFixed(2)} TB</span>
+                        <span>Price: <span class="currency-symbol-display">${currentCurrencySymbol}</span>${drive.price.toFixed(2)}</span>
+                        <span class="price-per-tb">Price/TB: <span class="currency-symbol-display">${currentCurrencySymbol}</span>${pricePerTB.toFixed(2)}</span>
+                    `;
+                    resultsListDiv.appendChild(resultItem);
+
+                    chartLabels.push(drive.name);
+                    chartData.push(pricePerTB);
+                    chartBackgroundColors.push(chartData.length % 2 === 0 ? 'rgba(0, 0, 128, 0.7)' : 'rgba(0, 128, 0, 0.7)'); 
+
+
+                    if (pricePerTB < bestPricePerTB) {
+                        bestPricePerTB = pricePerTB;
+                        bestDriveNames = [drive.name];
+                    } else if (pricePerTB.toFixed(2) === bestPricePerTB.toFixed(2)) { 
+                        bestDriveNames.push(drive.name);
+                    }
+                });
+                
+                 if (bestDriveNames.length > 0) {
+                    document.querySelectorAll('.result-item').forEach(item => {
+                        const nameSpan = item.querySelector('.drive-name-result');
+                        let itemName = nameSpan.textContent;
+                        if (nameSpan.querySelector('a')) { 
+                            itemName = nameSpan.querySelector('a').textContent;
+                        }
+
+                        if (nameSpan && bestDriveNames.includes(itemName)) {
+                            const pricePerTBSpan = item.querySelector('.price-per-tb');
+                            if (pricePerTBSpan) { 
+                                const priceText = pricePerTBSpan.textContent;
+                                const match = priceText.match(new RegExp(currentCurrencySymbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "([\\d\\.]+)"));
+                                if (match && match[1]) {
+                                    const currentPricePerTBValue = parseFloat(match[1]);
+                                     if (currentPricePerTBValue.toFixed(2) === bestPricePerTB.toFixed(2)) {
+                                        item.classList.add('best-value');
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    summaryDiv.innerHTML = `<p>Best individual deal: <strong>${bestDriveNames.join(', ')}</strong> at <span class="currency-symbol-display">${currentCurrencySymbol}</span>${bestPricePerTB.toFixed(2)} per TB!</p>`;
+                    summaryDiv.style.display = 'block';
+                }
+                if (chartData.length > 0) updateChart(chartLabels, chartData, chartBackgroundColors, `Price per TB (${currentCurrencySymbol})`);
+
+
+            } else { 
+                resultsTitle.textContent = `${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} Array Analysis:`;
+                
+                if (isNaN(numDrivesForRaidArray) || numDrivesForRaidArray <= 0) {
+                    resultsListDiv.innerHTML = "<p style='color:red; font-weight:bold;'>ERROR: Enter a valid number of drives for the RAID array.</p>";
+                    return;
+                }
+                if (numDrivesForRaidArray > validEnteredDrivesData.length) {
+                    resultsListDiv.innerHTML = `<p style='color:red; font-weight:bold;'>ERROR: Drives for RAID (${numDrivesForRaidArray}) can't be more than validly entered drives (${validEnteredDrivesData.length}).</p>`;
+                    return;
+                }
+
+                const drivesForRaidCalc = validEnteredDrivesData.slice(0, numDrivesForRaidArray);
+                const actualDriveCountForRaid = drivesForRaidCalc.length; 
+
+                let usableCapacity = 0;
+                let originalUsableCapacityForZFS = 0; 
+                let minDrivesRequired = 0;
+                let parityDrives = 0;
+                let errorMessage = null;
+
+                let totalRawCapacityInRaid = 0;
+                let totalPriceOfRaidDrives = 0;
+                let smallestCapacityInRaid = Infinity;
+                drivesForRaidCalc.forEach(d => {
+                    totalRawCapacityInRaid += d.capacity;
+                    totalPriceOfRaidDrives += d.price;
+                    if (d.capacity < smallestCapacityInRaid) smallestCapacityInRaid = d.capacity;
+                });
+
+                if (actualDriveCountForRaid === 0) { 
+                     resultsListDiv.innerHTML = "<p style='color:red; font-weight:bold;'>ERROR: No valid drives selected for RAID.</p>";
+                     return;
+                }
+
+                switch (selectedRaidType) {
+                    case 'raid0': minDrivesRequired = 2; parityDrives = 0; break;
+                    case 'raid1': minDrivesRequired = 2; parityDrives = actualDriveCountForRaid / 2; break; 
+                    case 'raid5': minDrivesRequired = 3; parityDrives = 1; break;
+                    case 'raid6': minDrivesRequired = 4; parityDrives = 2; break;
+                    case 'raid10': minDrivesRequired = 4; parityDrives = actualDriveCountForRaid / 2; break; 
+                    case 'raidz1': minDrivesRequired = 3; parityDrives = 1; break; 
+                    case 'raidz2': minDrivesRequired = 4; parityDrives = 2; break; 
+                    case 'raidz3': minDrivesRequired = 5; parityDrives = 3; break; 
+                }
+
+                if (actualDriveCountForRaid < minDrivesRequired) {
+                    errorMessage = `${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} needs at least ${minDrivesRequired} drives. You picked ${actualDriveCountForRaid}.`;
+                } else if (selectedRaidType === 'raid10' && actualDriveCountForRaid % 2 !== 0) {
+                    errorMessage = `RAID 10 needs an even number of drives. You picked ${actualDriveCountForRaid}.`;
+                } else {
+                    if (selectedRaidType === 'raid0') {
+                        usableCapacity = totalRawCapacityInRaid;
+                    } else if (selectedRaidType === 'raid1' || selectedRaidType === 'raid10') {
+                        usableCapacity = totalRawCapacityInRaid / 2; 
+                    } else { 
+                        usableCapacity = (actualDriveCountForRaid - parityDrives) * smallestCapacityInRaid;
+                    }
+                    originalUsableCapacityForZFS = usableCapacity; 
+                    if (applyZfs80Rule) {
+                        usableCapacity *= 0.80;
+                    }
+                }
+
+                if (errorMessage) {
+                    resultsListDiv.innerHTML = `<p style="color: red; font-weight:bold;">ERROR: ${errorMessage}</p>`;
+                } else if (usableCapacity <= 0 && originalUsableCapacityForZFS <=0) { 
+                    resultsListDiv.innerHTML = `<p style="color: red; font-weight:bold;">ERROR: Usable capacity is zero or less. Check drives/RAID type.</p>`;
+                } else if (usableCapacity <= 0 && applyZfs80Rule) {
+                     resultsListDiv.innerHTML = `<p style="color: red; font-weight:bold;">ERROR: Usable capacity is zero or less after 80% rule. Original: ${originalUsableCapacityForZFS.toFixed(2)} TB.</p>`;
+                }
+                else {
+                    const pricePerUsableTB = totalPriceOfRaidDrives / usableCapacity;
+                    let resultsHTML = `
+                        <div class="raid-summary-item"><strong>RAID Config:</strong> <span class="value">${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')}</span></div>
+                        <div class="raid-summary-item"><strong>Drives in Array:</strong> <span class="value">${actualDriveCountForRaid} (first ${actualDriveCountForRaid} valid drives)</span></div>
+                        <div class="raid-summary-item"><strong>Total Raw Cap (Array):</strong> <span class="value">${totalRawCapacityInRaid.toFixed(2)} TB</span></div>
+                        ${(selectedRaidType.includes('raid5') || selectedRaidType.includes('raid6') || selectedRaidType.includes('raidz')) ? 
+                        `<div class="raid-summary-item"><strong>Smallest Drive (for calc):</strong> <span class="value">${smallestCapacityInRaid === Infinity ? 'N/A' : smallestCapacityInRaid.toFixed(2) + ' TB'}</span></div>` : ''}
+                    `;
+                    if (applyZfs80Rule) {
+                        resultsHTML += `<div class="raid-summary-item highlight-zfs-rule"><strong>ZFS 80% Rule:</strong> <span class="value">APPLIED! (Capacity reduced by 20%)</span></div>`;
+                        resultsHTML += `<div class="raid-summary-item"><strong>Original Usable Cap:</strong> <span class="value">${originalUsableCapacityForZFS.toFixed(2)} TB</span></div>`;
+                        resultsHTML += `<div class="raid-summary-item"><strong>Adjusted Usable Cap (80%):</strong> <span class="value">${usableCapacity.toFixed(2)} TB</span></div>`;
+                    } else {
+                        resultsHTML += `<div class="raid-summary-item"><strong>Calculated Usable Cap:</strong> <span class="value">${usableCapacity.toFixed(2)} TB</span></div>`;
+                    }
+                    resultsHTML += `
+                        <div class="raid-summary-item"><strong>Total Cost (Array):</strong> <span class="value"><span class="currency-symbol-display">${currentCurrencySymbol}</span>${totalPriceOfRaidDrives.toFixed(2)}</span></div>
+                        <div class="raid-summary-item" style="font-weight:bold; color:#000000; background-color:#90ee90; padding:5px; border: 1px solid #000; margin-top: 3px;"><strong>Effective Price per Usable TB:</strong> <span class="value"><span class="currency-symbol-display">${currentCurrencySymbol}</span>${pricePerUsableTB.toFixed(2)}</span></div>
+                    `;
+                    resultsListDiv.innerHTML = resultsHTML;
+
+                    summaryDiv.innerHTML = `<p>For this ${actualDriveCountForRaid}-drive ${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} array${applyZfs80Rule ? " (with 80% rule)" : ""}, the effective price is <strong><span class="currency-symbol-display">${currentCurrencySymbol}</span>${pricePerUsableTB.toFixed(2)}</strong> per usable TB.</p>`;
+                    summaryDiv.style.display = 'block';
+
+                    chartLabels.push(`${selectedRaidType.toUpperCase().replace('RAIDZ', 'RAID-Z')} Array`);
+                    chartData.push(pricePerUsableTB);
+                    chartBackgroundColors.push('rgba(0, 0, 128, 0.7)'); 
+                    if (chartData.length > 0) updateChart(chartLabels, chartData, chartBackgroundColors, `Effective Price per Usable TB (${currentCurrencySymbol})`);
+
+                }
+            }
+        });
+
+        function updateChart(labels, data, backgroundColors, yAxisLabel) {
+            resultsChartContainer.style.display = 'block';
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            
+            if (resultsChart) {
+                resultsChart.destroy(); 
+            }
+
+            Chart.defaults.font.family = 'Arial, Helvetica, sans-serif';
+            Chart.defaults.color = '#000000';
+
+
+            resultsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: yAxisLabel,
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: '#000000', 
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: yAxisLabel,
+                                font: { weight: 'bold' }
+                            },
+                            grid: { color: '#808080' }, 
+                            ticks: { color: '#000000' }
+                        },
+                        x: {
+                             title: {
+                                display: true,
+                                text: 'Drive / Array Configuration',
+                                font: { weight: 'bold' }
+                            },
+                            grid: { display: false }, 
+                            ticks: { color: '#000000' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false 
+                        },
+                        tooltip: {
+                            backgroundColor: '#FFFFE0', 
+                            titleColor: '#000000',
+                            bodyColor: '#000000',
+                            borderColor: '#000000',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += currentCurrencySymbol + context.parsed.y.toFixed(2);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+            addDriveEntry(true); 
+            updateCurrencySymbol(currencySelect.value); 
+            populateLoadConfigSelect(); 
+
+            if (raidTypeSelect.value === 'none') {
+                drivesInRaidInput.disabled = true;
+                zfs80RuleGroup.style.display = 'none';
+            } else if (raidTypeSelect.value.startsWith('raidz')) {
+                drivesInRaidInput.disabled = false;
+                zfs80RuleGroup.style.display = 'block';
+            } else {
+                drivesInRaidInput.disabled = false;
+                zfs80RuleGroup.style.display = 'none';
+            }
+            const firstEntry = document.querySelector('.drive-entry');
+            if (firstEntry) applyDriveEntryLayout(firstEntry);
+        });
+
+    </script>
+
+</body>
+</html>
